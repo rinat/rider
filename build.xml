@@ -1,0 +1,208 @@
+<project name="Rider" default="build.release" basedir=".">
+    <!-- Define the Wireless Toolkit home directory. Needed by the tasks -->
+    <property name="wtk.home" value="C:\WTK2.5.2_01\"/>
+    <!--Obfuscator-->
+    <property name="wtk.proguard.home" value="C:\WTK2.5.2_01\externals\proguard4.4"/>
+    <!-- WTK tasks -->
+    <property name="antenna.home" value="C:\WTK2.5.2_01\externals\antenna-bin-1.2.1-beta.jar"/>
+    <!--Platform requirements-->
+    <property name="wtk.cldc.version" value="1.1"/>
+    <property name="wtk.midp.version" value="2.0"/>
+    <!-- This MIDlet Suite -->
+    <property name="midlet.suit" value="Rider"/>
+    <!-- Rider MIDlet -->
+    <property name="midlet.1.name" value="Rider"/>
+    <property name="midlet.1.class" value="rider.Rider"/>
+    <property name="midlet.1.icon" value="/icons/rider.png"/>
+    <property name="midlet.1.permissions"
+              value="javax.microedition.io.Connector.http, javax.microedition.io.Connector.file.read, javax.microedition.io.Connector.file.write"/>
+    <!-- Tests MIDlet -->
+    <property name="midlet.2.name" value="TestsInvoker"/>
+    <property name="midlet.2.class" value="unittest.TestsInvoker"/>
+    <property name="midlet.2.icon" value="/icons/rider.png"/>
+    <!-- Profile and Configuration -->
+    <property name="microedition.profile" value="MIDP-2.0"/>
+    <property name="microedition.configuration" value="CLDC-1.1"/>
+    <property name="jad.version" value="1.0"/>
+    <!-- Suite Vendor -->
+    <property name="suite.vendor" value="PS-41"/>
+    <!-- app.version -->
+    <property name="suite.version" value="1.0.0"/>
+    <!-- Suite name -->
+    <property name="suite.name" value="Rider"/>
+
+    <!-- Preprocess directory -->
+    <property name="preprocess.dir" location="src_preprocess"/>
+    <property name="preprocess.symbols" value=""/>
+
+    <!-- Exclude package from release -->
+    <property name="excludes.package.release" value="unittest/"/>
+
+    <!-- Directories of file locations -->
+    <property name="src.dir" location="src"/>
+    <property name="classes.dir" location="classes"/>
+    <property name="final.dir" location="final"/>
+    <property name="resources.dir" location="res"/>
+    <property name="thirdparty.dir" location="thirdparty"/>
+
+    <!-- The WTK tasks -->
+    <taskdef classpath="${antenna.home}" resource="antenna.properties"/>
+
+    <path id="bootclasspath">
+        <pathelement location="${wtk.home}\lib\cldcapi11.jar"/>
+        <pathelement location="${wtk.home}\lib\jsr75.jar"/>
+        <pathelement location="${wtk.home}\lib\midpapi20.jar"/>
+    </path>
+
+    <path id="thirdparty">
+        <path location="${thirdparty.dir}\j2meunit.jar"/>
+        <path location="${thirdparty.dir}\kxml.jar"/>
+        <path location="${thirdparty.dir}\microlog-logger-core-2.3.5.jar"/>
+        <path location="${thirdparty.dir}\microlog-logger-midp-file-2.3.5.jar"/>
+    </path>
+
+    <!-- Initialize -->
+    <!-- Delete class file before starting -->
+    <target name="initialize">
+        <echo message="Cleaning up..."/>
+        <!-- Delete all output directories -->
+        <delete dir="${classes.dir}"/>
+        <delete dir="${final.dir}"/>
+        <delete dir="${preprocess.dir}"/>
+        <!-- Create empty directories -->
+        <mkdir dir="${classes.dir}"/>
+        <mkdir dir="${final.dir}"/>
+    </target>
+
+    <target name="deinitialize">
+        <echo message="Cleaning resources..."/>
+        <delete dir="${classes.dir}"/>
+        <delete dir="${preprocess.dir}"/>
+    </target>
+
+    <target name="preprocess">
+        <echo message="Preprocessing..."/>
+        <wtkpreprocess srcdir="${src.dir}"
+                       destdir="${preprocess.dir}"
+                       symbols="${preprocess.symbols}">
+        </wtkpreprocess>
+    </target>
+
+    <target name="createPackage.debug">
+        <echo message="Creating package..."/>
+        <wtkpackage basedir="${classes.dir}"
+                    jarfile="${final.dir}/${midlet.suit}.jar"
+                    jadfile="${final.dir}/${midlet.suit}.jad"
+                    obfuscate="false"
+                    preverify="true">
+            <fileset dir="${resources.dir}"/>
+            <zipfileset src="${thirdparty.dir}\j2meunit.jar"/>
+            <zipfileset src="${thirdparty.dir}\kxml.jar"/>
+            <zipfileset src="${thirdparty.dir}\microlog-logger-core-2.3.5.jar"/>
+            <zipfileset src="${thirdparty.dir}\microlog-logger-midp-file-2.3.5.jar"/>
+        </wtkpackage>
+        <antcall target="deinitialize"/>
+    </target>
+
+    <target name="createPackage.release">
+        <echo message="Creating package..."/>
+        <wtkpackage basedir="${classes.dir}"
+                    jarfile="${final.dir}/${midlet.suit}.jar"
+                    jadfile="${final.dir}/${midlet.suit}.jad"
+                    obfuscate="false"
+                    preverify="true">
+            <fileset dir="${resources.dir}"/>
+            <zipfileset src="${thirdparty.dir}\kxml.jar"/>
+            <zipfileset src="${thirdparty.dir}\microlog-logger-core-2.3.5.jar"/>
+            <zipfileset src="${thirdparty.dir}\microlog-logger-midp-file-2.3.5.jar"/>
+        </wtkpackage>
+        <antcall target="deinitialize"/>
+    </target>
+
+    <target name="packDebug" depends="initialize">
+        <echo message="Debug building.."/>
+        <wtkbuild srcdir="${src.dir}"
+                  destdir="${classes.dir}"
+                  preverify="true"
+                  classpathref="thirdparty"
+                  bootclasspathref="bootclasspath">
+        </wtkbuild>
+
+        <wtkjad jadfile="${final.dir}/${midlet.suit}.jad"
+                jarfile="${final.dir}/${midlet.suit}.jar"
+                name="${suite.name}"
+                vendor="${suite.vendor}"
+                version="${suite.version}">
+
+            <!-- Add user-defined attributes to the JAD -->
+            <attribute name="MicroEdition-Profile" value="${microedition.profile}"/>
+            <attribute name="MicroEdition-Configuration" value="${microedition.configuration}"/>
+            <attribute name="JAD-Version" value="${jad.version}"/>
+            <attribute name="MIDlet-Permissions" value="${midlet.1.permissions}"/>
+
+            <!-- Add additional MIDlets to the suite, if necessary -->
+            <midlet name="${midlet.1.name}"
+                    icon="${midlet.1.icon}"
+                    class="${midlet.1.class}">
+            </midlet>
+
+            <!-- Add additional MIDlets to the suite, if necessary -->
+            <midlet name="${midlet.2.name}"
+                    icon="${midlet.2.icon}"
+                    class="${midlet.2.class}">
+            </midlet>
+        </wtkjad>
+
+        <antcall target="createPackage.debug"/>
+    </target>
+
+    <!--Compile & Preverify-->
+    <target name="packRelease" depends="initialize, preprocess">
+        <echo message="Release building.."/>
+        <wtkbuild srcdir="${preprocess.dir}"
+                  destdir="${classes.dir}"
+                  preverify="false"
+                  excludes="${excludes.package.release}"
+                  classpathref="thirdparty"
+                  bootclasspathref="bootclasspath">
+        </wtkbuild>
+
+        <wtkjad jadfile="${final.dir}/${midlet.suit}.jad"
+                jarfile="${final.dir}/${midlet.suit}.jar"
+                name="${suite.name}"
+                vendor="${suite.vendor}"
+                version="${suite.version}">
+
+            <!-- Add user-defined attributes to the JAD -->
+            <attribute name="MicroEdition-Profile" value="${microedition.profile}"/>
+            <attribute name="MicroEdition-Configuration" value="${microedition.configuration}"/>
+            <attribute name="JAD-Version" value="${jad.version}"/>
+            <attribute name="MIDlet-Permissions" value="${midlet.1.permissions}"/>
+
+            <!-- Add additional MIDlets to the suite, if necessary -->
+            <midlet name="${midlet.1.name}"
+                    icon="${midlet.1.icon}"
+                    class="${midlet.1.class}">
+            </midlet>
+        </wtkjad>
+
+        <antcall target="createPackage.release"/>
+    </target>
+
+    <target name="build.release" depends="packRelease">
+        <wtkobfuscate
+                jarfile="${final.dir}/${midlet.suit}.jar"
+                jadfile="${final.dir}/${midlet.suit}.jad"
+                tojarfile="${final.dir}/obfuscated"
+                obfuscator="proguard"
+                classpathref="thirdparty"
+                bootclasspathref="bootclasspath"
+                >
+            <argument value="'-keep public class * extends javax.microedition.midlet.MIDlet'"/>
+        </wtkobfuscate>
+        <wtkpreverify jarfile="${final.dir}/obfuscated/${midlet.suit}.jar"/>
+    </target>
+
+    <target name="build.debug" depends="packDebug">
+    </target>
+</project>

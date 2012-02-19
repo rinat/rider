@@ -1,0 +1,1 @@
+http://wiki.forum.nokia.com/index.php/How_to_display_rotated_text_in_Java_ME

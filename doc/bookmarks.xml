@@ -1,0 +1,22 @@
+<Bookmarks>
+    <Bookmark>
+        <Title>Apple Games</Title>
+        <Feeds>
+            <Feed>http://images.apple.com/main/rss/games/whats_new.rss</Feed>
+            <Feed>http://images.apple.com/webapps/games/recent.rss</Feed>
+        </Feeds>
+    </Bookmark>
+    <Bookmark>
+        <Title>Apple Hot News</Title>
+        <Feeds>
+            <Feed>http://images.apple.com/main/rss/hotnews/hotnews.rss</Feed>
+            <Feed>http://images.apple.com/webapps/news/recent.rss</Feed>
+        </Feeds>
+    </Bookmark>
+    <Bookmark>
+        <Title>Apple Press Release</Title>
+        <Feeds>
+            <Feed>http://images.apple.com/main/rss/hotnews/hotnews.rss</Feed>
+        </Feeds>
+    </Bookmark>
+</Bookmarks>
